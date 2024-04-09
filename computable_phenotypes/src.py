@@ -35,7 +35,9 @@ conn.close()
 print("Running Script")
 db="dbo"
 sql_script="script.sql"
-process = run([f'mssql -u {sql_username} -d {db} -p {sql_password}','select * from sys.databases\n','pwd'], stderr=PIPE,stdout=PIPE, stdin=PIPE,shell=True)
+script='./script.sql'
+output='./output.txt'
+process = run([f'sqlcmd -C -U {sql_username} -P {sql_password} -d {db} -i {script} -o {output}'], stderr=PIPE,stdout=PIPE, stdin=PIPE,shell=True)
 #process.stdin.write(f'select * from sys.databases\n')
 #process.stdin.flush()
 print(process.stdout)

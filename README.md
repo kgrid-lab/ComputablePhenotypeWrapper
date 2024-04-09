@@ -39,3 +39,10 @@ pyodbc is the driver that allows the python program to communicate with the MSSQ
 ```bash
 pip install pyodbc
 ```
+## Setting up .env file
+To run, make a .env file in the root directory with the following parameters:
+```bash
+MSSQL_USERNAME
+MSSQL_HOST
+MSSQL_PASSWORD
+```
