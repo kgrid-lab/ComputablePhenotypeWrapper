@@ -1,0 +1,34 @@
+[
+    {
+        "patId":"1",
+        "age":30,
+        "encounterList":[
+            {
+                "encounterId":"1",
+                "admitDate":"2/23/2021",
+                "dischargeDate":"2/23/2021",
+                "additionalInfo":{},
+                "diagnosisList":[
+                    {
+                        "diagnosisId":"1",
+                        "dx":"581.3"
+                    }
+                ]
+
+            },
+            {
+                "encounterId":"2",
+                "admitDate":"10/10/2021",
+                "dischargeDate":"10/10/2021",
+                "additionalInfo":{},
+                "diagnosisList":[
+                    {
+                        "diagnosisId":"2",
+                        "dx":"581.3"                  
+                    }
+                ]
+
+            }
+        ]
+    }
+]
