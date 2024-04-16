@@ -46,3 +46,5 @@ MSSQL_USERNAME
 MSSQL_HOST
 MSSQL_PASSWORD
 ```
+## Current Issues:
+Json Files dont have birthdates

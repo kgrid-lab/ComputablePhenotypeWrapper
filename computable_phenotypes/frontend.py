@@ -37,7 +37,7 @@ def create_tables(db_conn):
   execute(db_conn,diagnosis)
   execute(db_conn,demo)
 
-def run(input_file):
+def run_json(input_file):
   connection=connect()
   database_name="test"
   connection.autocommit=True

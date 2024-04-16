@@ -1,34 +1,62 @@
 [
     {
         "patId":"1",
-        "age":30,
+        "birthdate":"2/15/2010",
         "encounterList":[
             {
                 "encounterId":"1",
-                "admitDate":"2/23/2021",
-                "dischargeDate":"2/23/2021",
+                "admitDate":"2/1/2021",
+                "dischargeDate":"2/1/2021",
                 "additionalInfo":{},
                 "diagnosisList":[
                     {
                         "diagnosisId":"1",
                         "dx":"581.3"
-                    },
-                    {
-                        "diagnosisId":"2",
-                        "dx":"Z38.00"
                     }
                 ]
 
             },
             {
                 "encounterId":"2",
-                "admitDate":"10/10/2021",
-                "dischargeDate":"10/10/2021",
+                "admitDate":"2/2/2021",
+                "dischargeDate":"2/2/2021",
                 "additionalInfo":{},
                 "diagnosisList":[
                     {
                         "diagnosisId":"2",
                         "dx":"581.3"                  
+                    }
+                ]
+
+            }
+        ]
+    },
+    {
+        "patId":"2",
+        "birthdate":"2/15/2002",
+        "encounterList":[
+            {
+                "encounterId":"3",
+                "admitDate":"2/3/2021",
+                "dischargeDate":"2/3/2021",
+                "additionalInfo":{},
+                "diagnosisList":[
+                    {
+                        "diagnosisId":"3",
+                        "dx":"581.3"
+                    }
+                ]
+
+            },
+            {
+                "encounterId":"4",
+                "admitDate":"2/4/2021",
+                "dischargeDate":"2/4/2021",
+                "additionalInfo":{},
+                "diagnosisList":[
+                    {
+                        "diagnosisId":"4",
+                        "dx":"Z38.00"                  
                     }
                 ]
 

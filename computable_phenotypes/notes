@@ -3,4 +3,4 @@ Think of datasets like an archive, since this is an area where a lot of thought 
 Currently, the archival process for training models is a small group and not in line from achives and the transparincy of the datasets. Be less invisible and advocating for purges. 
 
 Approximating training data ablation for model pretraining:
-    Get more information about hte training data and wha tit means. Usually want to get a large corpus. 
+    Get more information about hte training data and wha tit means. Usually want to get a large corpus.Unable to actually try all the combinations that you may want to actually try. Partition the dat

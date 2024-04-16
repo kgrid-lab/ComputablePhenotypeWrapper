@@ -473,7 +473,7 @@ if OBJECT_ID('dbo.NS_Final_Inclusions_Output', 'U') is not NULL
 	drop table dbo.NS_Final_Inclusions_Output; 
 
 DECLARE @MyDate date;
-SET @MyDate = '01-01-2018'; -- As of this date, who has already been included?
+SET @MyDate = '01-01-2024'; -- As of this date, who has already been included?
 
 select 
 	 PatientID
@@ -509,7 +509,7 @@ sqlcmd -S SERVERNAME -d DATABASENAME -E -o "PATH\Nephrotic_Syndrome_Patients.csv
 /***** ALTERNATIVE: If you have the appropriate permissions, you can run the command below from SQL Server instead:
 ****** Again change SERVERNAME, DATABASENAME, PATH for output, and SCHEMA prefix for table name.*/
 
-Exec xp_cmdshell 'sqlcmd -S (localdb)\MSSQLLocalDB -d PlayGround -E -o "c:\test\Nephrotic_Syndrome_Patients.csv" -Q "Set NOCOUNT ON; Select * from dbo.NS_Final_Inclusions_Output" -W -w 999 -s","'
+--Exec xp_cmdshell 'sqlcmd -S (localdb)\MSSQLLocalDB -d PlayGround -E -o "c:\test\Nephrotic_Syndrome_Patients.csv" -Q "Set NOCOUNT ON; Select * from dbo.NS_Final_Inclusions_Output" -W -w 999 -s","'
 select * from dbo.NS_Final_Inclusions_Output
 
 --END of script---------------------------------------------------------------------------------------------

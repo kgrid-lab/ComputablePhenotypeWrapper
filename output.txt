@@ -207,32 +207,32 @@
 
 (1 rows affected)
 
-(0 rows affected)
+(6 rows affected)
+
+(6 rows affected)
+
+(6 rows affected)
+
+(6 rows affected)
+
+(6 rows affected)
+
+(6 rows affected)
+
+(4 rows affected)
 
 (0 rows affected)
 
-(0 rows affected)
+(6 rows affected)
 
-(0 rows affected)
+(4 rows affected)
 
-(0 rows affected)
+(2 rows affected)
 
-(0 rows affected)
-
-(0 rows affected)
-
-(0 rows affected)
-
-(0 rows affected)
-
-(0 rows affected)
-
-(0 rows affected)
-
-(0 rows affected)
-Msg 15281, Level 16, State 1, Server bc4f1284bf2a, Procedure xp_cmdshell, Line 1
-SQL Server blocked access to procedure 'sys.xp_cmdshell' of component 'xp_cmdshell' because this component is turned off as part of the security configuration for this server. A system administrator can enable the use of 'xp_cmdshell' by using sp_configure. For more information about enabling 'xp_cmdshell', search for 'xp_cmdshell' in SQL Server Books Online.
+(2 rows affected)
 PatientID   Cohort_Entry_Date       Anchor_EncounterID             Anchor_Admit_Date       Anchor_Discharge_Date   Birth_Date              Age         Race Sex Hispanic
 ----------- ----------------------- ------------------------------ ----------------------- ----------------------- ----------------------- ----------- ---- --- --------
+          1 2021-02-23 00:00:00.000 2                              2021-10-10 00:00:00.000 2021-10-10 00:00:00.000 1994-01-01 00:00:00.000          27 NULL NUL NULL    
+          2 2013-08-06 00:00:00.000 23                             2015-05-12 00:00:00.000 2015-05-12 00:00:00.000 2010-01-01 00:00:00.000           5 NULL NUL NULL    
 
-(0 rows affected)
+(2 rows affected)

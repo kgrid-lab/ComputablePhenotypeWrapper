@@ -1,16 +1,27 @@
 import json
 from computable_phenotypes.db import *
+class counter:
+  def get(self, type):
+     if type in self.counters:
+        self.counters[type]+=1
+        return self.counters[type]
+     else:
+        self.counters[type]=0
+        return 0
 def null_grab(dict,key):
   out=dict.get(key)
   if out==None:
     out='NULL'
   return out
+def date_parser(date):
+   split=date.split("/")
+   return f'\'{"-".join(split)}\''
 def get_dx_type(dx):
   try:
     float(dx)
-    return 9
+    return '09'
   except ValueError:
-    return 10
+    return '10'
 def read_json(file,db_conn):
    with open(file) as json_file:
       data= json.load(json_file)
@@ -30,7 +41,10 @@ def add_patient(input,db_conn):
   #if patient_id==None:
   #  patient_id=get_pat_id()
   age=null_grab(input,'age')
-  birthdate=null_grab(input,'birthdate')
+  birthdate=date_parser(null_grab(input,'birthdate'))
+  birthdate_parsed=null_grab(input,'birthdate')
+  if birthdate_parsed is "NULL":
+    birthdate=date_parser(f'1/1/{2024-age}')
   race=null_grab(input,'race')
   sex=null_grab(input,'sex')
   hispanic=null_grab(input,'hispanic')
@@ -46,8 +60,8 @@ def add_patient(input,db_conn):
         encounter_id=encounter_num
     encounter_num+=1
 
-    admit_date=enc.get("admitDate")
-    dis_date=enc.get("dischargeDate")
+    admit_date=date_parser(enc.get("admitDate"))
+    dis_date=date_parser(enc.get("dischargeDate"))
     enc_type=null_grab(enc,'ENC_Type')
     raw_enc_type=null_grab(enc,'Raw_Enc_Type')
     enc_com=f'''insert into dbo.Encounter values({patient_id},{encounter_id},{admit_date},{enc_type},{raw_enc_type},{dis_date});'''
@@ -59,10 +73,8 @@ def add_patient(input,db_conn):
         if diagnosis_id==None:
             diagnosis_id=diagnosis_num
         diagnosis_num+=1
-        dx=d['dx']
-        dx_type=get_dx_type(dx)
-        if dx_type==10:
-          dx=f"\'{d['dx']}\'"
+        dx_type=f"\'{get_dx_type(d['dx'])}\'"
+        dx=f"\'{d['dx']}\'"
         dx_source=null_grab(d,'DX_Source')
         diagnosis=f'''insert into dbo.Diagnosis values({patient_id},{diagnosis_id},{dx},{dx_type},{dx_source},{encounter_id});'''
         print(diagnosis)
