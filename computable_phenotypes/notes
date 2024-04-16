@@ -1,0 +1,6 @@
+Model perfrmance is driven by 1. Model size and 2. Data size. Om the amoutn of information that the datasets are trained. 
+Think of datasets like an archive, since this is an area where a lot of thought has already gone into what gets stored and what doesnt. At some point ,there became such an explosion of records that not all could be stored. THis could extenuate/hide biases and discrimination. 
+Currently, the archival process for training models is a small group and not in line from achives and the transparincy of the datasets. Be less invisible and advocating for purges. 
+
+Approximating training data ablation for model pretraining:
+    Get more information about hte training data and wha tit means. Usually want to get a large corpus. 

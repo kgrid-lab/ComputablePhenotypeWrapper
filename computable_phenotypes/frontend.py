@@ -1,6 +1,6 @@
 from computable_phenotypes.db import *
 from computable_phenotypes.json_loader import *
-
+from pathlib import Path
 def create_tables(db_conn):
   remove_table(db_conn,'dbo.Encounter')
   remove_table(db_conn,'dbo.Diagnosis')
@@ -52,7 +52,8 @@ def run(input_file):
   read_json(input_file,tables_conn)
   tables_conn.commit()
   print("Running Script")
-  #run_script('script.sql')
+  script_path=Path(__file__).resolve().parent / 'script.sql'
+  run_script(script_path,database_name,'output.txt')
   tables_conn.close()
   print("Deleting DB")
   #delete_database(connection,database_name)

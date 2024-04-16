@@ -23,8 +23,8 @@ def execute(db_conn,command):
   db_cursor.execute(command)
 def run_script(sql_script,db,output):
     host,user,password=load_env()
-    process = run([f'sqlcmd -C -U {user} -d {db} -i {sql_script} -o {output}'], stderr=PIPE,stdout=PIPE, stdin=PIPE,shell=True)
-    process.stdin.write(password)
+    process = run([f'sqlcmd -C -U {user} -P {password} -d {db} -i {sql_script} -o {output}'], stderr=PIPE,stdout=PIPE, stdin=PIPE,shell=True)
+    #process.stdin.write(password)
     print(process.stderr)
     print(process.stdout)
 def connect(database=None):

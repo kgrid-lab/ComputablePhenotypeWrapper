@@ -6,9 +6,11 @@ def null_grab(dict,key):
     out='NULL'
   return out
 def get_dx_type(dx):
-   if isinstance(dx, float):
-      return 9
-   return 10
+  try:
+    float(dx)
+    return 9
+  except ValueError:
+    return 10
 def read_json(file,db_conn):
    with open(file) as json_file:
       data= json.load(json_file)
@@ -59,6 +61,8 @@ def add_patient(input,db_conn):
         diagnosis_num+=1
         dx=d['dx']
         dx_type=get_dx_type(dx)
+        if dx_type==10:
+          dx=f"\'{d['dx']}\'"
         dx_source=null_grab(d,'DX_Source')
         diagnosis=f'''insert into dbo.Diagnosis values({patient_id},{diagnosis_id},{dx},{dx_type},{dx_source},{encounter_id});'''
         print(diagnosis)
