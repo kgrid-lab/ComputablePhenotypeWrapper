@@ -54,9 +54,10 @@ def run_json(input_file):
   print("Running Script")
   script_path=Path(__file__).resolve().parent / 'script.sql'
   run_script(script_path,database_name,'output.txt')
+  collect_output(tables_conn,'output.json')
   tables_conn.close()
   print("Deleting DB")
-  #delete_database(connection,database_name)
+  delete_database(connection,database_name)
   connection.close()
 if __name__ == "__main__":
   run()

@@ -1,4 +1,5 @@
 import json
+import pandas as pd
 from computable_phenotypes.db import *
 class counter:
   def get(self, type):
@@ -79,3 +80,6 @@ def add_patient(input,db_conn):
         diagnosis=f'''insert into dbo.Diagnosis values({patient_id},{diagnosis_id},{dx},{dx_type},{dx_source},{encounter_id});'''
         print(diagnosis)
         execute(db_conn,diagnosis)
+def collect_output(connection,file):
+  res=pd.read_sql("select * from dbo.NS_Final_Inclusions", connection)
+  res.to_json(file,orient ='records')
