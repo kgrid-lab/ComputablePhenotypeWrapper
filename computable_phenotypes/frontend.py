@@ -54,8 +54,8 @@ def run_json(input_file):
   tables_conn.commit()
   print("Running Script")
   script_path=Path(__file__).resolve().parent / 'script.sql'
-  run_script(script_path,database_name,'script_output.txt')
-  collect_output(tables_conn,'output.json')
+  run_script(script_path,database_name,'./output/script_output.txt')
+  collect_output(tables_conn,'./output/output.json')
   tables_conn.close()
   print("Deleting DB")
   delete_database(connection,database_name)
@@ -76,8 +76,8 @@ def run_csv(input_file):
   tables_conn.commit()
   print("Running Script")
   script_path=Path(__file__).resolve().parent / 'script.sql'
-  run_script(script_path,database_name,'script_output.txt')
-  csv_collect_output(tables_conn,'output.csv')
+  run_script(script_path,database_name,'./output/script_output.txt')
+  csv_collect_output(tables_conn,'./output/output.csv')
   tables_conn.close()
   print("Deleting DB")
   delete_database(connection,database_name)
