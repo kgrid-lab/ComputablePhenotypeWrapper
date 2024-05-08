@@ -1,0 +1,20 @@
+{
+    "id":"opt int",
+    "birthdate":"Req date",
+    "encounters":[
+        {
+            "admitDate":"req date",
+            "dischargeDate":"opt date",
+            "additionalInfo":{
+                "ENC_Type":"OPT string",
+                "Raw_Enc_Type":"OPT string"
+            },
+            "diagnosisList":[
+                {
+                    "dx":"req string"
+                }
+            ]
+
+        }
+    ]
+}
