@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request, UploadFile
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 
-from computable_phenotypes.utils import process_json
+from computable_phenotypes.utils.utils import process_json
 
 # from nephroticsyndrome_computablephenotype.utils import is_csv, is_json, prepare_data_from_csv
 

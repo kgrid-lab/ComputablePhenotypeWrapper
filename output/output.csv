@@ -1,3 +1,0 @@
-PatientID,Anchor_EncounterID,Entry_Date,Anchor_Admit_Date,Anchor_Discharge_Date,Birth_Date,Age,Race,Sex,Hispanic
-1,2,2021-02-23,2021-10-10,2021-10-10,1994-01-01,27,,,
-2,23,2013-08-06,2015-05-12,2015-05-12,2010-01-01,5,,,

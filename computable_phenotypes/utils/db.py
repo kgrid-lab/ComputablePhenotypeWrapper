@@ -1,7 +1,7 @@
 import pyodbc
 from dotenv import load_dotenv
 import os
-from subprocess import Popen, PIPE, run
+from subprocess import PIPE, run
 def remove_table(db_conn,table_name):
   execute(db_conn,
           f'''if OBJECT_ID('{table_name}', 'U') is not NULL
@@ -23,7 +23,7 @@ def execute(db_conn,command):
   db_cursor.execute(command)
 def run_script(sql_script,db,output):
     host,user,password=load_env()
-    process = run([f'sqlcmd -C -U {user} -P {password} -d {db} -i {sql_script} -o {output}'], stderr=PIPE,stdout=PIPE, stdin=PIPE,shell=True)
+    process = run([f'sqlcmd -C -U {user} -P {password} -d {db} -i {sql_script} '], stderr=PIPE,stdout=PIPE, stdin=PIPE,shell=True) #-o {output}
     #process.stdin.write(password)
     #print(process.stderr)
     #print(process.stdout)
@@ -41,3 +41,39 @@ def load_env():
     sql_username=os.getenv("MSSQL_USERNAME")
     sql_password=os.getenv("MSSQL_PASSWORD")
     return sql_host,sql_username,sql_password
+
+def create_tables(db_conn):
+  remove_table(db_conn,'dbo.Encounter')
+  remove_table(db_conn,'dbo.Diagnosis')
+  remove_table(db_conn,'dbo.Demographic')
+  remove_table(db_conn,'dbo.PCOR_Encounters')
+  encounter='''CREATE TABLE dbo.Encounter (
+    PATID int,
+	  ENCOUNTERID nvarchar(30) NULL,
+    ADMIT_DATE datetime NULL,
+    ENC_Type nvarchar(30) NULL,
+    Raw_Enc_Type nvarchar(30) NULL ,
+    DISCHARGE_DATE datetime NULL
+    );'''
+  diagnosis='''
+    CREATE TABLE dbo.Diagnosis
+    (
+        PATID int,
+        DIAGNOSISID nvarchar(10) NULL,
+        DX nvarchar(10) NULL,
+        DX_Type nvarchar(30) NULL,
+        DX_Source nvarchar(30) NULL,
+        ENCOUNTERID nvarchar(30) NULL
+    );'''
+  demo='''
+  CREATE TABLE dbo.Demographic
+  (
+    PATID int,
+    BIRTH_DATE datetime,
+    SEX nvarchar(2),
+    HISPANIC nvarchar(2),
+    RACE nvarchar(2)
+    );'''
+  execute(db_conn,encounter)
+  execute(db_conn,diagnosis)
+  execute(db_conn,demo)

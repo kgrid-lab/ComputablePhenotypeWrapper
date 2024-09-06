@@ -1,1 +1,1 @@
-include computable_phenotypes/script.sql
+include computable_phenotypes/utils/script.sql
