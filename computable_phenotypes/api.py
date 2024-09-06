@@ -3,8 +3,9 @@ import json
 from fastapi import FastAPI, Request, UploadFile
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
+from io import StringIO
 
-from computable_phenotypes.utils.utils import process_json
+from computable_phenotypes.utils.utils import process_json, is_csv, is_json, process_csv
 
 # from nephroticsyndrome_computablephenotype.utils import is_csv, is_json, prepare_data_from_csv
 
@@ -59,41 +60,41 @@ async def process_body_input(patients_list:list[dict]):
     return json.loads(process_json(patients_list))
 
 
-# @app.post("/classification2", tags=["Nephrotic Syndrome Computable Phenotype"])
-# async def process_uploaded_file(file: UploadFile ):
+@app.post("/classification2", tags=["Nephrotic Syndrome Computable Phenotype"])
+async def process_uploaded_file(file: UploadFile ):
 
-#     """
+    """
 
-#     **Classify patients and return inclusion encounters for nephrotic syndrome:**
+    **Classify patients and return inclusion encounters for nephrotic syndrome:**
 
-#     This api could be used to process multiple patients data, including their encounters and diagnoses and to classify them for Nephrotic Syndrome. It receives patient data in either JSON or CSV format, applies computable phenotype,
-#     and returns a list of inclusion encounters.  For more detail on the implementation and input data format please check our GitHub repository.
+    This api could be used to process multiple patients data, including their encounters and diagnoses and to classify them for Nephrotic Syndrome. It receives patient data in either JSON or CSV format, applies computable phenotype,
+    and returns a list of inclusion encounters.  For more detail on the implementation and input data format please check our GitHub repository.
 
-#     **Parameters:**
-#     :param file: Patient data in JSON or CSV format.
+    **Parameters:**
+    :param file: Patient data in JSON or CSV format.
 
-#     **Sample input data:**
-#     Sample input data (CSV and JSON) can be found in the GitHub repository under the 'input_test_data' folder:
-#     [Link to GitHub Repository](https://github.com/kgrid-lab/nephroticsyndrome-computablephenotype/tree/main/input_test_data)
+    **Sample input data:**
+    Sample input data (CSV and JSON) can be found in the GitHub repository under the 'input_test_data' folder:
+    [Link to GitHub Repository](https://github.com/kgrid-lab/nephroticsyndrome-computablephenotype/tree/main/input_test_data)
 
-#     **Implementation:**
-#     The implementation of this app is available on GitHub:
-#     [Link to GitHub Repository](https://github.com/kgrid-lab/nephroticsyndrome-computablephenotype)
+    **Implementation:**
+    The implementation of this app is available on GitHub:
+    [Link to GitHub Repository](https://github.com/kgrid-lab/nephroticsyndrome-computablephenotype)
 
-#     **Returns:**
-#     List of inclusion encounters that meet the criteria.
-#     """
+    **Returns:**
+    List of inclusion encounters that meet the criteria.
+    """
     
-#     content = await file.read()
-#     if is_csv(content):
-#         patientList = prepare_data_from_csv(content)
-#     elif is_json(content):
-#         data = json.loads(content)
-#         patientList = [Patient(**item) for item in data]
-#     else:
-#         return "Input data must be json or csv"
+    content = await file.read()
+    if is_csv(content):
+        return json.loads(process_csv(StringIO(content.decode('utf-8'))))
+    elif is_json(content):
+        patients_list = json.loads(content)
+        return json.loads(process_json(patients_list))
+    else:
+        return "Input data must be json or csv"
     
-#     return process_patient_list(patientList)
+    
 
 # only runs virtual server when running this .py file directly for debugging
 if __name__ == "__main__":

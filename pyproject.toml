@@ -13,6 +13,7 @@ mysql-connector-python = "^8.3.0"
 pyodbc = "^5.1.0"
 fastapi = "^0.113.0"
 uvicorn = "^0.30.6"
+python-multipart = "^0.0.9"
 
 
 [build-system]
