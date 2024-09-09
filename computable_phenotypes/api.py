@@ -1,16 +1,18 @@
 import json
+from io import StringIO
 
 from fastapi import FastAPI, Request, UploadFile
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
-from io import StringIO
 
-from computable_phenotypes.utils.utils import process_json, is_csv, is_json, process_csv
+from computable_phenotypes.utils.utils import is_csv, is_json, process_csv, process_json
 
 # from nephroticsyndrome_computablephenotype.utils import is_csv, is_json, prepare_data_from_csv
 
+
 class TextInput(BaseModel):
     text: str
+
 
 app = FastAPI(
     title="Computable Phenotype",
@@ -34,8 +36,7 @@ async def root(request: Request):
 
 
 @app.post("/classification1", tags=["Nephrotic Syndrome Computable Phenotype"])
-async def process_body_input(patients_list:list[dict]):
-
+async def process_body_input(patients_list: list[dict]):
     """
 
     **Classify patients and return inclusion encounters for nephrotic syndrome:**
@@ -52,17 +53,16 @@ async def process_body_input(patients_list:list[dict]):
 
     **Implementation:**
     The implementation of this app is available on GitHub:
-    [Link to GitHub Repository](https://github.com/kgrid-lab/nephroticsyndrome-computablephenotype)
+    [Link to GitHub Repository](https://github.com/kgrid-lab/ComputablePhenotypeWrapper)
 
     **Returns:**
     List of inclusion encounters that meet the criteria.
-    """      
+    """
     return json.loads(process_json(patients_list))
 
 
 @app.post("/classification2", tags=["Nephrotic Syndrome Computable Phenotype"])
-async def process_uploaded_file(file: UploadFile ):
-
+async def process_uploaded_file(file: UploadFile):
     """
 
     **Classify patients and return inclusion encounters for nephrotic syndrome:**
@@ -79,22 +79,21 @@ async def process_uploaded_file(file: UploadFile ):
 
     **Implementation:**
     The implementation of this app is available on GitHub:
-    [Link to GitHub Repository](https://github.com/kgrid-lab/nephroticsyndrome-computablephenotype)
+    [Link to GitHub Repository](https://github.com/kgrid-lab/ComputablePhenotypeWrapper)
 
     **Returns:**
     List of inclusion encounters that meet the criteria.
     """
-    
+
     content = await file.read()
     if is_csv(content):
-        return json.loads(process_csv(StringIO(content.decode('utf-8'))))
+        return json.loads(process_csv(StringIO(content.decode("utf-8"))))
     elif is_json(content):
         patients_list = json.loads(content)
         return json.loads(process_json(patients_list))
     else:
         return "Input data must be json or csv"
-    
-    
+
 
 # only runs virtual server when running this .py file directly for debugging
 if __name__ == "__main__":
