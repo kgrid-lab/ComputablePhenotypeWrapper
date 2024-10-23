@@ -18,7 +18,7 @@ loguru = "^0.7.2"
 sqlalchemy = "^2.0.34"
 
 [tool.poetry.scripts]
-nephroticsyndrome-computablephenotype = "computable_phenotype.cli:main"
+nephroticsyndrome-computablephenotype = "computable_phenotypes.cli:main"
 
 [build-system]
 requires = ["poetry-core"]
