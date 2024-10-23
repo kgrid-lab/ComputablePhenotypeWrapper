@@ -39,10 +39,89 @@ pyodbc is the driver that allows the python program to communicate with the MSSQ
 ```bash
 pip install pyodbc
 ```
-## Setting up .env file
+### Setting up .env file
 To run, make a .env file in the root directory with the following parameters:
 ```bash
 MSSQL_USERNAME
 MSSQL_HOST
 MSSQL_PASSWORD
 ```
+
+### Install poetry
+[Install Poetry](https://python-poetry.org/docs/#installation) which is a tool for dependency management and packaging in Python
+
+## How to install, run and test the app
+
+### Install and run the app from the code 
+Clone the repository using
+```zsh
+git clone https://github.com/kgrid-lab/ComputablePhenotypeWrapper.git
+```
+Install the dependencies and the project
+```zsh
+poetry install 
+```
+
+#### API service
+Run the API service using 
+```zsh
+uvicorn computable_phenotypes.api:app
+```
+
+#### CLI service
+Use one of the following approaches to configure and run the CLI:
+1. Run the script directly using Python's module option
+```zsh
+python -m computable_phenotypes.cli input_test_data/sample_input.json
+```
+
+2. Make the script executable and run directly
+```
+# Make the script executable on Unix/Linux/macOS:
+chmod +x computable_phenotypes/cli.py 
+# Run directly
+./computable_phenotypes/cli.py input_test_data/sample_input.json
+```
+
+3. Configure and use it as a command named ***classify*** anywhere from the command line:
+
+Create a symbolic link to cli.py in a directory that is already on your PATH (e.g., /usr/local/bin/) using
+
+```zsh
+# On Unix/Linux/macOS:
+ln -s /path/to/cli.py /usr/local/bin/classify
+```
+Note that `/usr/local/bin/` is usually in your PATH. The specific location where you should link your script might vary.
+
+Alternatively You can add an alias in your shell configuration file (like .bashrc or .zshrc):
+
+```zsh
+alias classify='/path/to/cli.py'
+```
+After adding the alias, you may need to reload the shell configuration using source ~/.bashrc or restart your terminal.
+
+call using 
+```zsh
+# pipe input file to the classify command and redirect the processed output to output.json
+cat input_test_data/sample_input.json | classify > output.json
+
+```
+
+### Install and run the app from a distribution file
+Install the app using a distribution file
+```zsh
+pip install https://github.com/kgrid-lab/ComputablePhenotypeWrapper/releases/download/1.0.0/computable_phenotypes-0.1.0-py3-none-any.whl
+```
+Then, run the app using 
+```zsh
+uvicorn computable_phenotypes.api:app
+```
+
+Once the app is running, you can access fastapi documentation at http://127.0.0.1:8000 to test the API. Use the test files in the input_test_data folder for testing the API.
+
+or you can run the app using the cli command using
+Run the script directly using Python's module option
+```zsh
+python -m computable_phenotypes.cli input_test_data/sample_input.json
+```
+
