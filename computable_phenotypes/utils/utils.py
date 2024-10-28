@@ -10,12 +10,13 @@ from computable_phenotypes.utils.db import (
     create_tables,
     delete_database,
     run_script,
+    fetch
 )
 from computable_phenotypes.utils.Patients import Patients
 
 
-def read_json(patients_list, connection):
-    patients = Patients(db=connection)
+def read_json(patients_list, database_name):
+    patients = Patients(database_name=database_name)
 
     for pat in patients_list:
         try:
@@ -37,42 +38,35 @@ def read_json(patients_list, connection):
 
 
 def process_json(patients_list: list[dict]):
-    db_engine = connect()
     database_name = "test"
     # connection.autocommit=True
 
     try:
         logger.info("Deleting DB")
-        with db_engine.connect() as conn:
-            delete_database(conn, database_name)
+        delete_database(database_name)
 
         logger.info("Creating DB")
-        with db_engine.connect() as conn:
-            create_database(conn, database_name)
+        create_database(database_name)
 
-        logger.info("Creating tables")
-        tables_engine = connect(database_name)
-        with tables_engine.connect() as tables_conn:
-            create_tables(tables_conn)
-            logger.info("Reading Input")
-            read_json(patients_list, tables_conn)
-            # tables_conn.commit()
-            logger.info("Running Script")
-            run_script(
-                "./computable_phenotypes/script.sql",
-                database_name,
-                "./script_output.txt",
-            )
+        create_tables(database_name)
+        logger.info("Reading Input")
+        read_json(patients_list, database_name)
+        # tables_conn.commit()
+        logger.info("Running Script")
+        run_script(
+            "./computable_phenotypes/script.sql",
+            database_name,
+            "./script_output.txt",
+        )
+        
 
-            res = pd.read_sql_query(
-                "select * from dbo.NS_Final_Inclusions", tables_conn
-            )
-            output = res.to_json(orient="records", indent=2, date_format="iso")
-        tables_engine.dispose()
+
+        output = fetch(database_name,"select * from dbo.NS_Final_Inclusions")
+    except Exception as e:
+        print(f"An error occurred: {e}")
     finally:
         logger.info("Deleting DB")
-        with db_engine.connect() as drop_conn:
-            delete_database(drop_conn, database_name)
+        delete_database(database_name)
 
     return output
 
