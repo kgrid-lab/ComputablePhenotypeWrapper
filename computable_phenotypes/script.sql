@@ -15,7 +15,7 @@ CREATE TABLE Ref_NS_Codes
 	Diag_Code nvarchar(10) NULL,
 	Incl_Excl nvarchar(10) NULL,
 	Incl_Excl_Type nvarchar(30) NULL
-)
+);
 
 
 --Insert diagnosis code values into table
@@ -171,7 +171,7 @@ insert into Ref_NS_Codes values('ICD-10','N04.9','Inclusion','NSNOS_Encounter');
 --Part 2----------------------------------------------------------------------------------------------------
 --Get Diagnosis records and set flags for conditions related to each diagnosis record
 drop table IF EXISTS NS_EncounterConditions;
-
+CREATE TABLE NS_EncounterConditions AS
 select D.PATID, D.ENCOUNTERID
 	, max(case when C.Incl_Excl_Type = 'NEPH5829_Encounter'		then 1 else 0 end) as NEPH5829_Flag
 	, max(case when C.Incl_Excl_Type = 'NEPH5832_Encounter'		then 1 else 0 end) as NEPH5832_Flag
@@ -183,7 +183,6 @@ select D.PATID, D.ENCOUNTERID
 	, max(case when C.Incl_Excl_Type = 'PrimaryNS_Encounter'	then 1 else 0 end) as PrimaryNS_Flag
 	, max(case when C.Incl_Excl_Type = 'NSNOS_Encounter'		then 1 else 0 end) as NSNOS_Flag
 	, max(case when C.Incl_Excl_Type = 'Exclude_Encounter'		then 1 else 0 end) as Exclude_Code_Flag
-into NS_EncounterConditions
 from Diagnosis as D
 	join Ref_NS_Codes as C
 		on D.DX = C.Diag_Code
@@ -204,7 +203,7 @@ group by D.PATID, D.ENCOUNTERID
 --Add encounter and demographic data to the diagnosis data
 
 drop table IF EXISTS NS_Encounter_Level;
-
+CREATE TABLE NS_Encounter_Level AS
 select
 	 E.ENCOUNTERID
 	,E.PATID
@@ -213,7 +212,7 @@ select
 	,E.ENC_TYPE
 	,E.Raw_Enc_Type
 	,D.BIRTH_DATE
-	,(0 + Convert(Char(8),E.ADMIT_DATE,112) - Convert(Char(8),D.BIRTH_DATE,112)) / 10000 AS Age
+    ,(strftime('%Y', E.ADMIT_DATE) - strftime('%Y', D.BIRTH_DATE)) as Age
 	,D.SEX
 	,D.HISPANIC
 	,D.RACE
@@ -227,7 +226,6 @@ select
 	,DX.PrimaryNS_Flag
 	,DX.NSNOS_Flag
 	,DX.Exclude_Code_Flag
-into NS_Encounter_Level
 from Encounter as E
 	JOIN NS_EncounterConditions as DX
 		on E.ENCOUNTERID = DX.ENCOUNTERID
@@ -243,10 +241,9 @@ where
 
 drop table IF EXISTS NS_Encounter_Sort;
 
-
+CREATE TABLE NS_Encounter_Sort AS
 select *
 	, ROW_NUMBER() OVER (PARTITION BY PATID ORDER BY DISCHARGE_DATE, Admit_Date, EncounterID) AS Encounter_Row
-into NS_Encounter_Sort
 from NS_Encounter_Level
 ;
 
@@ -257,10 +254,10 @@ from NS_Encounter_Level
 
 drop table IF EXISTS NS_Encounter_Sort_2;
 
+CREATE TABLE NS_Encounter_Sort_2 AS
 Select Cur.*
 	,N.ADMIT_DATE AS Next_Admit_Date
 	,N.Discharge_Date AS Next_Discharge_Date
-into NS_Encounter_Sort_2
 from NS_Encounter_Sort as Cur
 	left JOIN NS_Encounter_Sort as N
 		on Cur.Encounter_Row = N.Encounter_Row - 1 and Cur.patid=N.patid
@@ -273,10 +270,10 @@ from NS_Encounter_Sort as Cur
 
 drop table IF EXISTS NS_Encounter_Sort_3;
 
+CREATE TABLE NS_Encounter_Sort_3 AS
 Select Cur.*
 	,N.ADMIT_DATE AS Prior_Admit_Date
 	,N.Discharge_Date AS Prior_Discharge_Date
-into NS_Encounter_Sort_3
 from NS_Encounter_Sort_2 as Cur
 	left JOIN NS_Encounter_Sort_2 as N
 		on Cur.Encounter_Row = N.Encounter_Row + 1 and Cur.patid=N.patid
@@ -288,6 +285,7 @@ from NS_Encounter_Sort_2 as Cur
 
 drop table IF EXISTS NS_Encounter_Sums;
 
+CREATE TABLE NS_Encounter_Sums AS
 select 
 	 PATID 
 	,ENCOUNTERID
@@ -324,7 +322,6 @@ select
 	,Next_Discharge_Date
 	,Prior_Admit_Date
 	,Prior_Discharge_Date
-into NS_Encounter_Sums
 from NS_Encounter_Sort_3
 ; 
 
@@ -335,6 +332,7 @@ from NS_Encounter_Sort_3
 
 drop table IF EXISTS NS_Possible_Inclusions;
 
+CREATE TABLE NS_Possible_Inclusions AS
 select
 	PATID
 	,EncounterID
@@ -342,7 +340,6 @@ select
 	,PrimaryNS_Total
 	,NSNOS_Total
 	,1 as Possible_Inclusion
-into NS_Possible_Inclusions
 from
 	NS_Encounter_Sums
 where
@@ -357,6 +354,7 @@ where
 
 drop table IF EXISTS NS_Possible_Exclusions;
 
+CREATE TABLE NS_Possible_Exclusions AS
 select
 	PATID
 	,EncounterID
@@ -370,7 +368,6 @@ select
 	,Lupus_Total
 	,Exclude_Code_Total
 	,1 as Possible_Exclusion
-into NS_Possible_Exclusions
 from
 	NS_Encounter_Sums
 where
@@ -391,6 +388,7 @@ where
 
 drop table IF EXISTS NS_Possible;
 
+CREATE TABLE NS_Possible AS
 select
 	Sums.*
 	,case
@@ -399,7 +397,6 @@ select
 	,case
 		when ex.possible_exclusion = 1 then 1 else 0 
 	 end as Possible_Exclusion
-into NS_Possible
 from NS_Encounter_Sums as Sums
 	left join NS_Possible_Inclusions as I
 		on Sums.encounterid = I.encounterid
@@ -414,11 +411,11 @@ from NS_Encounter_Sums as Sums
 
 drop table IF EXISTS NS_Final_Inclusions_Flag;
 
+CREATE TABLE NS_Final_Inclusions_Flag AS
 select
 	 P.*
 	,1 as Final_Inclusion_Flag
 	,P.Prior_Discharge_Date AS Entry_Date
-into NS_Final_Inclusions_Flag
 from NS_Possible as P
 where P.possible_inclusion = 1 and P.possible_exclusion != 1
 ;
@@ -429,7 +426,7 @@ where P.possible_inclusion = 1 and P.possible_exclusion != 1
 
 drop table IF EXISTS NS_Final_Inclusions;
 
-
+CREATE TABLE NS_Final_Inclusions AS
 select
 	  patid AS PatientID
 	, ENCOUNTERID as Anchor_EncounterID
@@ -441,7 +438,6 @@ select
 	, RACE as Race
 	, SEX as Sex
 	, Hispanic
-into NS_Final_Inclusions
 from
 (
        select *, ROW_NUMBER() OVER(PARTITION BY patid ORDER BY Encounter_Row) as RowNum
@@ -457,9 +453,7 @@ where RowNum = 1
 
 drop table IF EXISTS NS_Final_Inclusions_Output; 
 
-DECLARE @MyDate date;
-SET @MyDate = '01-01-2024'; -- As of this date, who has already been included?
-
+CREATE TABLE NS_Final_Inclusions_Output AS
 select 
 	 PatientID
 	, Entry_Date as Cohort_Entry_Date
@@ -471,9 +465,8 @@ select
 	, Race
 	, Sex
 	, Hispanic
-into NS_Final_Inclusions_Output
 from NS_Final_Inclusions
-where Entry_Date <= @MyDate
+where Entry_Date <= '2024-01-01'
 ;
 
 

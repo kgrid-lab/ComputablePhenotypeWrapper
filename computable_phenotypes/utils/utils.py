@@ -61,7 +61,7 @@ def process_json(patients_list: list[dict]):
         
 
 
-        output = fetch(database_name,"select * from dbo.NS_Final_Inclusions")
+        output = fetch(database_name,"select * from NS_Final_Inclusions")
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
