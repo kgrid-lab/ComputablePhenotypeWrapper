@@ -1,3 +1,4 @@
+from enum import Enum
 import json
 from io import StringIO
 
@@ -5,7 +6,9 @@ from fastapi import FastAPI, Request, UploadFile
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 
-from computable_phenotypes.utils.utils import is_csv, is_json, process_csv, process_json
+import computable_phenotypes.utils_mssql.utils as mssql_utils
+import computable_phenotypes.utils_sqlite.utils as sqlite_utils
+from computable_phenotypes.utils import is_csv, is_json
 
 # from nephroticsyndrome_computablephenotype.utils import is_csv, is_json, prepare_data_from_csv
 
@@ -34,9 +37,12 @@ async def root(request: Request):
     response = RedirectResponse(url="/docs")
     return response
 
-
+class DatabaseType(str, Enum):
+    sqlite = "sqlite"
+    sql_server = "sql_server"
+    
 @app.post("/classification1", tags=["Nephrotic Syndrome Computable Phenotype"])
-async def process_body_input(patients_list: list[dict]):
+async def process_body_input( patients_list: list[dict],db_type: DatabaseType):
     """
 
     **Classify patients and return inclusion encounters for nephrotic syndrome:**
@@ -58,11 +64,14 @@ async def process_body_input(patients_list: list[dict]):
     **Returns:**
     List of inclusion encounters that meet the criteria.
     """
-    return json.loads(process_json(patients_list))
+    if db_type==DatabaseType.sql_server:
+        return json.loads(mssql_utils.process_json(patients_list))
+    else:
+        return json.loads(sqlite_utils.process_json(patients_list))
 
 
 @app.post("/classification2", tags=["Nephrotic Syndrome Computable Phenotype"])
-async def process_uploaded_file(file: UploadFile):
+async def process_uploaded_file(file: UploadFile, db_type: DatabaseType):
     """
 
     **Classify patients and return inclusion encounters for nephrotic syndrome:**
@@ -87,10 +96,16 @@ async def process_uploaded_file(file: UploadFile):
 
     content = await file.read()
     if is_csv(content):
-        return json.loads(process_csv(StringIO(content.decode("utf-8"))))
+        if db_type == DatabaseType.sql_server:
+            return json.loads(mssql_utils.process_csv(StringIO(content.decode("utf-8"))))
+        else:
+            return json.loads(sqlite_utils.process_csv(StringIO(content.decode("utf-8"))))
     elif is_json(content):
         patients_list = json.loads(content)
-        return json.loads(process_json(patients_list))
+        if db_type == DatabaseType.sql_server:
+            return json.loads(mssql_utils.process_json(patients_list))
+        else:
+            return json.loads(sqlite_utils.process_json(patients_list))
     else:
         return "Input data must be json or csv"
 

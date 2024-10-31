@@ -4,18 +4,19 @@ import json
 import pandas as pd
 from loguru import logger
 
-from computable_phenotypes.utils.db import (
+from computable_phenotypes.utils_sqlite.db import (
     connect,
     create_database,
     create_tables,
     delete_database,
     run_script,
+    fetch
 )
-from computable_phenotypes.utils.Patients import Patients
+from computable_phenotypes.utils_sqlite.Patients import Patients
 
 
-def read_json(patients_list, connection):
-    patients = Patients(db=connection)
+def read_json(patients_list, database_name):
+    patients = Patients(database_name=database_name)
 
     for pat in patients_list:
         try:
@@ -37,48 +38,41 @@ def read_json(patients_list, connection):
 
 
 def process_json(patients_list: list[dict]):
-    db_engine = connect()
     database_name = "test"
     # connection.autocommit=True
 
     try:
         logger.info("Deleting DB")
-        with db_engine.connect() as conn:
-            delete_database(conn, database_name)
+        delete_database(database_name)
 
         logger.info("Creating DB")
-        with db_engine.connect() as conn:
-            create_database(conn, database_name)
+        create_database(database_name)
 
         logger.info("Creating tables")
-        tables_engine = connect(database_name)
-        with tables_engine.connect() as tables_conn:
-            create_tables(tables_conn)
-            logger.info("Reading Input")
-            read_json(patients_list, tables_conn)
-            # tables_conn.commit()
-            logger.info("Running Script")
-            run_script(
-                "./computable_phenotypes/script.sql",
-                database_name,
-                "./script_output.txt",
-            )
-
-            res = pd.read_sql_query(
-                "select * from dbo.NS_Final_Inclusions", tables_conn
-            )
-            output = res.to_json(orient="records", indent=2, date_format="iso")
-        tables_engine.dispose()
+        create_tables(database_name)
+        
+        logger.info("Reading Input")
+        read_json(patients_list, database_name)
+        # tables_conn.commit()
+        logger.info("Running Script")
+        run_script(
+            "./computable_phenotypes/classification_script_sqlite.sql",
+            database_name,
+            "./script_output.txt",
+        )
+        
+        output = fetch(database_name,"select * from NS_Final_Inclusions")
+    except Exception as e:
+        print(f"An error occurred: {e}")
     finally:
         logger.info("Deleting DB")
-        with db_engine.connect() as drop_conn:
-            delete_database(drop_conn, database_name)
+        delete_database(database_name)
 
     return output
 
 
-def read_csv(file, connection):
-    patients = Patients(db=connection)
+def read_csv(file, database_name):
+    patients = Patients(database_name=database_name)
 
     df = pd.read_csv(
         file,
@@ -103,49 +97,33 @@ def read_csv(file, connection):
             patients.add_dx(pat_id, enc_id, row["diagnosis"])
 
 
-def csv_collect_output(connection, file):
-    res = pd.read_sql_query("select * from dbo.NS_Final_Inclusions", connection)
-    res.to_csv(file, index=False)
-
-
 def process_csv(input_file):
-    db_engine = connect()
     database_name = "test"
 
     try:
         logger.info("Deleting DB")
-        with db_engine.connect() as conn:
-            delete_database(conn, database_name)
+        delete_database(database_name)
 
         logger.info("Creating DB")
-        with db_engine.connect() as conn:
-            create_database(conn, database_name)
+        create_database(database_name)
 
         logger.info("Creating tables")
-        tables_engine = connect(database_name)
-        with tables_engine.connect() as tables_conn:
-            create_tables(tables_conn)
+        create_tables(database_name)
+        
+        logger.info("Reading Input")
+        read_csv(input_file, database_name)
 
-            logger.info("Reading Input")
-            read_csv(input_file, tables_conn)
+        logger.info("Running Script")
+        run_script(
+            "./computable_phenotypes/classification_script_sqlite.sql",
+            database_name,
+            "./output/script_output.txt",
+        )
 
-            logger.info("Running Script")
-            run_script(
-                "./computable_phenotypes/script.sql",
-                database_name,
-                "./output/script_output.txt",
-            )
-            # csv_collect_output(tables_conn,'./output/output.csv')
-
-            res = pd.read_sql_query(
-                "select * from dbo.NS_Final_Inclusions", tables_conn
-            )
-            output = res.to_json(orient="records", indent=2, date_format="iso")
-        tables_engine.dispose()
+        output = fetch(database_name,"select * from NS_Final_Inclusions")
     finally:
         logger.info("Deleting DB")
-        with db_engine.connect() as drop_conn:
-            delete_database(drop_conn, database_name)
+        delete_database(database_name)
 
     return output
 

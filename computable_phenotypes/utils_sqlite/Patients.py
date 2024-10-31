@@ -1,19 +1,16 @@
 from datetime import datetime
 import pprint
 
-from computable_phenotypes.utils.db import execute
+from computable_phenotypes.utils_sqlite.db import execute
 
 
 class Patients:
-    def __init__(self, db=None, verbose=False):
+    def __init__(self, database_name=None, verbose=False):
         self.patients = {}
         self.loaded = False
         self.verbose = verbose
-        self.db = db
-        if db is None:
-            self.write = False
-        else:
-            self.write = True
+        self.database_name = database_name
+        
 
     def add_patient(self, birthday, race=None, sex=None, hisp=None, pat_id=None):
         """
@@ -44,10 +41,10 @@ class Patients:
             "encounters": {},
         }
         base[pat_id] = patient_info
-        if self.write:
-            pat_instr = f"""insert into dbo.Demographic values({patient_info['pat_id']},{patient_info['birthdate']},{patient_info['sex']},{patient_info['hispanic']},{patient_info['race']});"""
-            self.log(pat_instr)
-            execute(self.db, pat_instr)
+        
+        pat_instr = f"""insert into Demographic values({patient_info['pat_id']},{patient_info['birthdate']},{patient_info['sex']},{patient_info['hispanic']},{patient_info['race']});"""
+        self.log(pat_instr)
+        execute(self.database_name, pat_instr)
         return pat_id
 
     def add_enc(
@@ -86,10 +83,10 @@ class Patients:
             "diagnosisList": {},
         }
         base[enc_id] = enc_info
-        if self.write:
-            enc_instr = f"""insert into dbo.Encounter values({pat_id},{enc_info['enc_id']},{enc_info['admit_date']},{enc_info['enc_type']},{enc_info['raw_enc_type']},{enc_info['discharge_date']});"""
-            self.log(enc_instr)
-            execute(self.db, enc_instr)
+
+        enc_instr = f"""insert into Encounter values({pat_id},{enc_info['enc_id']},{enc_info['admit_date']},{enc_info['enc_type']},{enc_info['raw_enc_type']},{enc_info['discharge_date']});"""
+        self.log(enc_instr)
+        execute(self.database_name, enc_instr)
         return enc_id
 
     def add_dx(self, pat_id, enc_id, code, dx_id=None, dx_source=None, db=None):
@@ -116,10 +113,10 @@ class Patients:
             "dx_source": nullify(dx_source),
         }
         base[dx_id] = dx_info
-        if self.write:
-            dx_instr = f"""insert into dbo.Diagnosis values({pat_id},{dx_info['dx_id']},{dx_info['dx']},{dx_info['dx_type']},{dx_info['dx_source']},{enc_id});"""
-            self.log(dx_instr)
-            execute(self.db, dx_instr)
+
+        dx_instr = f"""insert into Diagnosis values({pat_id},{dx_info['dx_id']},{dx_info['dx']},{dx_info['dx_type']},{dx_info['dx_source']},{enc_id});"""
+        self.log(dx_instr)
+        execute(self.database_name, dx_instr)
         return dx_id
 
     def print(self):
@@ -139,15 +136,15 @@ class Patients:
 
         for patid, pat in self.patients:
             # load patient
-            pat_instr = f"""insert into dbo.Demographic values({pat['pat_id']},{pat['birthdate']},{pat['sex']},{pat['hispanic']},{pat['race']});"""
+            pat_instr = f"""insert into Demographic values({pat['pat_id']},{pat['birthdate']},{pat['sex']},{pat['hispanic']},{pat['race']});"""
             self.log(pat_instr)
             execute(db_connection, pat_instr)
             for enc_id, encs in pat["encounters"]:
-                enc_instr = f"""insert into dbo.Encounter values({pat['pat_id']},{encs['enc_id']},{encs['admit_date']},{encs['enc_type']},{encs['raw_enc_type']},{encs['discharge_date']});"""
+                enc_instr = f"""insert into Encounter values({pat['pat_id']},{encs['enc_id']},{encs['admit_date']},{encs['enc_type']},{encs['raw_enc_type']},{encs['discharge_date']});"""
                 self.log(enc_instr)
                 execute(db_connection, enc_instr)
                 for dx_id, dx in encs["diagnosis_list"]:
-                    dx_instr = f"""insert into dbo.Diagnosis values({pat['pat_id']},{dx['dx_id']},{dx['dx']},{dx['dx_type']},{dx['dx_source']},{encs['enc_id']});"""
+                    dx_instr = f"""insert into Diagnosis values({pat['pat_id']},{dx['dx_id']},{dx['dx']},{dx['dx_type']},{dx['dx_source']},{encs['enc_id']});"""
                     self.log(dx_instr)
                     execute(db_connection, dx_instr)
 
@@ -166,7 +163,3 @@ def nullify(val):
     else:
         return string_wrap(val)
 
-
-def date_parser(date):
-    split = date.split("/")
-    return f'\'{"-".join(split)}\''
