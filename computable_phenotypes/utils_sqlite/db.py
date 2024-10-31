@@ -6,7 +6,7 @@ from subprocess import PIPE, run
 import sqlite3
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
-
+import importlib.resources as pkg_resources
 
 def create_database(database_name):
     connection = sqlite3.connect(database_name)
@@ -70,46 +70,11 @@ def fetch(database_name, query):
     connection.close()
     return json_data
 
-def remove_table(database_name, table_name):
-    connection = sqlite3.connect(database_name)
-    cursor = connection.cursor()
-    cursor.execute("DROP TABLE IF EXISTS " + table_name )
-
-    connection.commit()
-
-    
+   
 def create_tables(database_name):
-    remove_table(database_name, "Encounter")
-    remove_table(database_name, "Diagnosis")
-    remove_table(database_name, "Demographic")
-    remove_table(database_name, "PCOR_Encounters")
-    encounter = """CREATE TABLE Encounter (
-    PATID int,
-	  ENCOUNTERID nvarchar(30) NULL,
-    ADMIT_DATE datetime NULL,
-    ENC_Type nvarchar(30) NULL,
-    Raw_Enc_Type nvarchar(30) NULL ,
-    DISCHARGE_DATE datetime NULL
-    );"""
-    diagnosis = """
-    CREATE TABLE Diagnosis
-    (
-        PATID int,
-        DIAGNOSISID nvarchar(10) NULL,
-        DX nvarchar(10) NULL,
-        DX_Type nvarchar(30) NULL,
-        DX_Source nvarchar(30) NULL,
-        ENCOUNTERID nvarchar(30) NULL
-    );"""
-    demo = """
-  CREATE TABLE Demographic
-  (
-    PATID int,
-    BIRTH_DATE datetime,
-    SEX nvarchar(2),
-    HISPANIC nvarchar(2),
-    RACE nvarchar(2)
-    );"""
-    execute(database_name, encounter)
-    execute(database_name, diagnosis)
-    execute(database_name, demo)
+    with pkg_resources.path("computable_phenotypes", "preparation_script_sqlite.sql") as sql_file_path:
+        run_script(
+            str(sql_file_path),
+            database_name,
+            None
+        )

@@ -5,6 +5,7 @@ from subprocess import PIPE, run
 import pyodbc
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
+import importlib.resources as pkg_resources
 
 
 def create_database(connection, database_name):
@@ -69,46 +70,10 @@ def load_env():
     sql_password = os.getenv("MSSQL_PASSWORD")
     return sql_host, sql_username, sql_password
 
-
-def remove_table(db_conn, table_name):
-    execute(
-        db_conn,
-        f"""if OBJECT_ID('{table_name}', 'U') is not NULL
-          drop table {table_name};""",
-    )
-
-
-def create_tables(db_conn):
-    remove_table(db_conn, "dbo.Encounter")
-    remove_table(db_conn, "dbo.Diagnosis")
-    remove_table(db_conn, "dbo.Demographic")
-    encounter = """CREATE TABLE dbo.Encounter (
-    PATID int,
-	  ENCOUNTERID nvarchar(30) NULL,
-    ADMIT_DATE datetime NULL,
-    ENC_Type nvarchar(30) NULL,
-    Raw_Enc_Type nvarchar(30) NULL ,
-    DISCHARGE_DATE datetime NULL
-    );"""
-    diagnosis = """
-    CREATE TABLE dbo.Diagnosis
-    (
-        PATID int,
-        DIAGNOSISID nvarchar(10) NULL,
-        DX nvarchar(10) NULL,
-        DX_Type nvarchar(30) NULL,
-        DX_Source nvarchar(30) NULL,
-        ENCOUNTERID nvarchar(30) NULL
-    );"""
-    demo = """
-  CREATE TABLE dbo.Demographic
-  (
-    PATID int,
-    BIRTH_DATE datetime,
-    SEX nvarchar(2),
-    HISPANIC nvarchar(2),
-    RACE nvarchar(2)
-    );"""
-    execute(db_conn, encounter)
-    execute(db_conn, diagnosis)
-    execute(db_conn, demo)
+def create_tables(db_conn, database_name):
+    with pkg_resources.path("computable_phenotypes", "preparation_script_mssql.sql") as sql_file_path:
+        run_script(
+            str(sql_file_path),
+            database_name,
+            None
+        )

@@ -53,7 +53,7 @@ def process_json(patients_list: list[dict]):
         logger.info("Creating tables")
         tables_engine = connect(database_name)
         with tables_engine.connect() as tables_conn:
-            create_tables(tables_conn)
+            create_tables(tables_conn, database_name)
             logger.info("Reading Input")
             read_json(patients_list, tables_conn)
             # tables_conn.commit()
