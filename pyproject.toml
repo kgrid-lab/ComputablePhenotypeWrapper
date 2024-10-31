@@ -25,7 +25,9 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.include]
-"computable_phenotypes/*.sql" = "computable_phenotypes"
+files = [
+    "computable_phenotype/*.sql"
+]
 
 [tool.setuptools]
 include-package-data = true
