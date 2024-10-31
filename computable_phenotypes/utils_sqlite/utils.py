@@ -3,7 +3,7 @@ import json
 
 import pandas as pd
 from loguru import logger
-
+import os
 from computable_phenotypes.utils_sqlite.db import (
     connect,
     create_database,
@@ -55,6 +55,7 @@ def process_json(patients_list: list[dict]):
         read_json(patients_list, database_name)
         # tables_conn.commit()
         logger.info("Running Script")
+        print(os.listdir('.'))
         run_script(
             "./computable_phenotypes/classification_script_sqlite.sql",
             database_name,
