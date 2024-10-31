@@ -5,8 +5,9 @@ import json
 import sys
 from io import StringIO
 
-from computable_phenotypes.utils.utils import is_csv, is_json, process_csv, process_json
-
+import computable_phenotypes.utils_mssql.utils as mssql_utils
+import computable_phenotypes.utils_sqlite.utils as sqlite_utils
+from computable_phenotypes.utils import is_csv, is_json
 
 def main():
     parser = argparse.ArgumentParser(
@@ -43,6 +44,13 @@ def main():
         type=str,
         help="The file that contains patient data in either JSON or CSV format.",
     )
+    
+    parser.add_argument(
+        "--db_type",
+        type=str,
+        required=False,  # Use required=False if you want it to be optional
+        help="The type of database to use. Your options are 'sqlite' and 'sql_server'. sqllite does not require any environment preparation while sql server needs to be installed and setup for sql_server.",
+    )
 
     args = parser.parse_args()
 
@@ -56,10 +64,18 @@ def main():
         content = sys.stdin.buffer.read()
 
     if is_csv(content):
-        print(process_csv(StringIO(content.decode("utf-8"))))
+        if args.db_type == "sql_server":
+            print(mssql_utils.process_csv(StringIO(content.decode("utf-8"))))
+        else:
+            print(sqlite_utils.process_csv(StringIO(content.decode("utf-8"))))
+
     elif is_json(content):
         patients_list = json.loads(content)
-        print(process_json(patients_list))
+        if args.db_type == "sql_server":
+            print(mssql_utils.process_json(patients_list))
+        else:
+            print(sqlite_utils.process_json(patients_list))
+
     else:
         print("Input data must be json or csv")
 
