@@ -1,89 +1,89 @@
+import json
 import os
 import urllib
 from subprocess import PIPE, run
 
-import pyodbc
+import sqlite3
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 
 
-def create_database(connection, database_name):
-    connection.execution_options(isolation_level="AUTOCOMMIT").execute(
-        text(f"CREATE DATABASE {database_name};")
-    )
+def create_database(database_name):
+    connection = sqlite3.connect(database_name)
+    cursor = connection.cursor()
+
+    return cursor
 
 
-def delete_database(connection, database_name):
-    execute(
-        connection,
-        f"""IF DB_ID('{database_name}') IS NOT NULL
-            DROP DATABASE {database_name};""",
-        allow_transaction=False,  # Disable transaction for this command
-    )
+def delete_database(database_name):
+    if os.path.exists(database_name):
+        os.remove(database_name)
 
 
-def execute(connection, command, allow_transaction=True):
-    if allow_transaction:
-        # For normal commands, use transactions
-        with connection.begin():
-            connection.execute(text(command))
-    else:
-        # For commands like CREATE DATABASE or DROP DATABASE, use AUTOCOMMIT
-        connection.execution_options(isolation_level="AUTOCOMMIT").execute(
-            text(command)
-        )
-
-
-def run_script(sql_script, db, output):
-    host, user, password = load_env()
-    process = run(
-        [f"sqlcmd -C -U {user} -P {password} -d {db} -i {sql_script} "],
-        stderr=PIPE,
-        stdout=PIPE,
-        stdin=PIPE,
-        shell=True,
-    )  # -o {output}
-    # process.stdin.write(password)
-    # print(process.stderr)
-    # print(process.stdout)
-
+def execute(database_name, command):
+    connection = sqlite3.connect(database_name)
+    cursor = connection.cursor()
+    cursor.execute(command)
+    connection.commit()
+def run_script(sql_script, database_name, output):
+    connection = sqlite3.connect(database_name)
+    cursor = connection.cursor()
+    with open(sql_script, 'r') as file:
+        sql_script_content = file.read()
+        cursor.executescript(sql_script_content)
+    connection.commit()
+    connection.close()
 
 def connect(database=None):
-    host, user, password = load_env()
-    database_conn = ""
-    if database:
-        database_conn = ";database=" + database
+    # host, user, password = load_env()
+    # database_conn = ""
+    # if database:
+    #     database_conn = ";database=" + database
         
-    conn_str = f"DRIVER={{ODBC Driver 18 for SQL Server}};SERVER={host};UID={user};PWD={password};TrustServerCertificate=yes{database_conn}"
-    params = urllib.parse.quote_plus(conn_str)
-    engine = create_engine(f"mssql+pyodbc:///?odbc_connect={params}")
+    # conn_str = f"DRIVER={{ODBC Driver 18 for SQL Server}};SERVER={host};UID={user};PWD={password};TrustServerCertificate=yes{database_conn}"
+    # params = urllib.parse.quote_plus(conn_str)
+    # engine = create_engine(f"mssql+pyodbc:///?odbc_connect={params}")
+    connection = sqlite3.connect(database)
+    cursor = connection.cursor()
 
-    return engine
+    return cursor
 
+def fetch(database_name, query):
+    connection = sqlite3.connect(database_name)
+    cursor = connection.cursor()
 
-def load_env():
-    pyodbc.pooling = False
-    load_dotenv()
-    sql_host = os.getenv("MSSQL_HOST")
-    sql_username = os.getenv("MSSQL_USERNAME")
-    sql_password = os.getenv("MSSQL_PASSWORD")
-    return sql_host, sql_username, sql_password
+    # Run the SELECT query
+    query = query
+    cursor.execute(query)
 
+    # Fetch the results and column names
+    rows = cursor.fetchall()
+    column_names = [description[0] for description in cursor.description]
 
-def remove_table(db_conn, table_name):
-    execute(
-        db_conn,
-        f"""if OBJECT_ID('{table_name}', 'U') is not NULL
-          drop table {table_name};""",
-    )
+    # Convert to a list of dictionaries
+    data = [dict(zip(column_names, row)) for row in rows]
 
+    # Convert to JSON
+    json_data = json.dumps(data, indent=4)
 
-def create_tables(db_conn):
-    remove_table(db_conn, "dbo.Encounter")
-    remove_table(db_conn, "dbo.Diagnosis")
-    remove_table(db_conn, "dbo.Demographic")
-    remove_table(db_conn, "dbo.PCOR_Encounters")
-    encounter = """CREATE TABLE dbo.Encounter (
+    # Close the database connection
+    connection.close()
+    return json_data
+
+def remove_table(database_name, table_name):
+    connection = sqlite3.connect(database_name)
+    cursor = connection.cursor()
+    cursor.execute("DROP TABLE IF EXISTS " + table_name )
+
+    connection.commit()
+
+    
+def create_tables(database_name):
+    remove_table(database_name, "Encounter")
+    remove_table(database_name, "Diagnosis")
+    remove_table(database_name, "Demographic")
+    remove_table(database_name, "PCOR_Encounters")
+    encounter = """CREATE TABLE Encounter (
     PATID int,
 	  ENCOUNTERID nvarchar(30) NULL,
     ADMIT_DATE datetime NULL,
@@ -92,7 +92,7 @@ def create_tables(db_conn):
     DISCHARGE_DATE datetime NULL
     );"""
     diagnosis = """
-    CREATE TABLE dbo.Diagnosis
+    CREATE TABLE Diagnosis
     (
         PATID int,
         DIAGNOSISID nvarchar(10) NULL,
@@ -102,7 +102,7 @@ def create_tables(db_conn):
         ENCOUNTERID nvarchar(30) NULL
     );"""
     demo = """
-  CREATE TABLE dbo.Demographic
+  CREATE TABLE Demographic
   (
     PATID int,
     BIRTH_DATE datetime,
@@ -110,6 +110,6 @@ def create_tables(db_conn):
     HISPANIC nvarchar(2),
     RACE nvarchar(2)
     );"""
-    execute(db_conn, encounter)
-    execute(db_conn, diagnosis)
-    execute(db_conn, demo)
+    execute(database_name, encounter)
+    execute(database_name, diagnosis)
+    execute(database_name, demo)
