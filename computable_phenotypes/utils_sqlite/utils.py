@@ -3,7 +3,6 @@ import json
 
 import pandas as pd
 from loguru import logger
-import os
 from computable_phenotypes.utils_sqlite.db import (
     connect,
     create_database,
@@ -13,6 +12,7 @@ from computable_phenotypes.utils_sqlite.db import (
     fetch
 )
 from computable_phenotypes.utils_sqlite.Patients import Patients
+import importlib.resources as pkg_resources
 
 
 def read_json(patients_list, database_name):
@@ -55,12 +55,12 @@ def process_json(patients_list: list[dict]):
         read_json(patients_list, database_name)
         # tables_conn.commit()
         logger.info("Running Script")
-        print(os.listdir('.'))
-        run_script(
-            "./computable_phenotypes/classification_script_sqlite.sql",
-            database_name,
-            "./script_output.txt",
-        )
+        with pkg_resources.path("computable_phenotypes", "classification_script_sqlite.sql") as sql_file_path:
+            run_script(
+                str(sql_file_path),
+                database_name,
+                "./script_output.txt",
+            )
         
         output = fetch(database_name,"select * from NS_Final_Inclusions")
     except Exception as e:
