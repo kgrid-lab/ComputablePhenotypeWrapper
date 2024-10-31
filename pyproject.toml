@@ -5,6 +5,8 @@ description = ""
 authors = ["anurag-bangera <97190957+anurag-bangera@users.noreply.github.com>"]
 readme = "README.md"
 
+include = ["computable_phenotype/classification_script_mssql.sql", "computable_phenotype/classification_script_sqlite.sql"]
+
 [tool.poetry.dependencies]
 python = "^3.9"
 pandas = "^2.2.1"
@@ -23,11 +25,6 @@ nephroticsyndrome-computablephenotype = "computable_phenotypes.cli:main"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.include]
-files = [
-    "computable_phenotype/*.sql"
-]
 
 [tool.setuptools]
 include-package-data = true
