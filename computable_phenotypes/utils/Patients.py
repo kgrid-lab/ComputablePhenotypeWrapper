@@ -1,3 +1,4 @@
+from datetime import datetime
 import pprint
 
 from computable_phenotypes.utils.db import execute
@@ -29,9 +30,11 @@ class Patients:
             if base.get(pat_id) is not None:
                 return pat_id
         # Add Patient
+        date_obj=datetime.strptime(birthday, "%m/%d/%Y")
+        birthdate=date_obj.strftime("\'%Y-%m-%d\'")
         patient_info = {
             "pat_id": pat_id,
-            "birthdate": date_parser(birthday),
+            "birthdate": birthdate,
             "race": race,
             "sex": sex,
             "hispanic": hisp,
@@ -67,10 +70,14 @@ class Patients:
             if base.get(enc_id) is not None:
                 return enc_id
         # Add Enc
+        date_obj=datetime.strptime(admit_date, "%m/%d/%Y")
+        admitdate=date_obj.strftime("\'%Y-%m-%d\'")
+        date_obj=datetime.strptime(dis_date, "%m/%d/%Y")
+        disdate=date_obj.strftime("\'%Y-%m-%d\'")
         enc_info = {
             "enc_id": enc_id,
-            "admit_date": date_parser(admit_date),
-            "discharge_date": date_parser(dis_date),
+            "admit_date": admitdate,
+            "discharge_date": disdate,
             "enc_type": nullify(enc_type),
             "raw_enc_type": nullify(raw_enc_type),
             "diagnosisList": {},
@@ -157,6 +164,3 @@ def nullify(val):
         return string_wrap(val)
 
 
-def date_parser(date):
-    split = date.split("/")
-    return f'\'{"-".join(split)}\''
