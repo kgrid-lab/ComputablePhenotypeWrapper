@@ -82,7 +82,6 @@ def create_tables(db_conn):
     remove_table(db_conn, "dbo.Encounter")
     remove_table(db_conn, "dbo.Diagnosis")
     remove_table(db_conn, "dbo.Demographic")
-    remove_table(db_conn, "dbo.PCOR_Encounters")
     encounter = """CREATE TABLE dbo.Encounter (
     PATID int,
 	  ENCOUNTERID nvarchar(30) NULL,

@@ -12,7 +12,7 @@ from computable_phenotypes.utils_mssql.db import (
     run_script,
 )
 from computable_phenotypes.utils_mssql.Patients import Patients
-
+import importlib.resources as pkg_resources
 
 def read_json(patients_list, connection):
     patients = Patients(db=connection)
@@ -58,11 +58,12 @@ def process_json(patients_list: list[dict]):
             read_json(patients_list, tables_conn)
             # tables_conn.commit()
             logger.info("Running Script")
-            run_script(
-                "./computable_phenotypes/classification_script_mssql.sql",
-                database_name,
-                "./script_output.txt",
-            )
+            with pkg_resources.path("computable_phenotypes", "classification_script_mssql.sql") as sql_file_path:
+                run_script(
+                    sql_file_path,
+                    database_name,
+                    "./script_output.txt",
+                )
 
             res = pd.read_sql_query(
                 "select * from dbo.NS_Final_Inclusions", tables_conn
@@ -125,11 +126,12 @@ def process_csv(input_file):
             read_csv(input_file, tables_conn)
 
             logger.info("Running Script")
-            run_script(
-                "./computable_phenotypes/classification_script_mssql.sql",
-                database_name,
-                "./output/script_output.txt",
-            )
+            with pkg_resources.path("computable_phenotypes", "classification_script_mssql.sql") as sql_file_path:
+                run_script(
+                    sql_file_path,
+                    database_name,
+                    "./output/script_output.txt",
+                )
 
             res = pd.read_sql_query(
                 "select * from dbo.NS_Final_Inclusions", tables_conn

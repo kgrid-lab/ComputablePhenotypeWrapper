@@ -115,11 +115,12 @@ def process_csv(input_file):
         read_csv(input_file, database_name)
 
         logger.info("Running Script")
-        run_script(
-            "./computable_phenotypes/classification_script_sqlite.sql",
-            database_name,
-            "./output/script_output.txt",
-        )
+        with pkg_resources.path("computable_phenotypes", "classification_script_sqlite.sql") as sql_file_path:
+            run_script(
+                str(sql_file_path),
+                database_name,
+                "./output/script_output.txt",
+            )
 
         output = fetch(database_name,"select * from NS_Final_Inclusions")
     finally:
