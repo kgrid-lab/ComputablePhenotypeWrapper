@@ -14,6 +14,10 @@ The Kgrid team also reimplemented this knowledge as a pure python script [here](
 
 You can try different ways to install and use this app in our [Google Colab Jupyter Notebook Playground](https://colab.research.google.com/drive/1NQtMlYst_TIYWrCi5DcY3sQmd1HRqF6U?usp=sharing).
 
+
+https://github.com/user-attachments/assets/b14aa07d-47a5-40ff-87a3-9f916cfe082e
+
+
 ## Environment Setup
 As mentioned earlier, this knowledge object could be executed with SQLite or SQL Server database being used in the background. If SQLite is selected, no database setup is needed, whereas using SQL Server requires Microsoft SQL Server and Microsoft ODBC driver for SQL Server to be installed and configured. 
 
